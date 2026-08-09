@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
 
     [Header("移動設定")]
     [SerializeField] private float moveSpeed = 5.0f;
+    [SerializeField] private float dashSpeed = 9.0f; // ダッシュ時の移動速度
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float gravity = -9.81f;
 
@@ -55,7 +56,7 @@ public class Player : MonoBehaviour
             velocity.y = -2f;
         }
 
-        // キーボード入力の判定
+        // キーボード入力の判定（前後左右）
         float x = 0f;
         float z = 0f;
 
@@ -67,15 +68,55 @@ public class Player : MonoBehaviour
             if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) z -= 1f;
         }
 
-        Vector3 move = (transform.right * x + transform.forward * z).normalized;
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        // --- ダッシュ入力の判定 ---
+        bool isDashing = false;
 
-        // Spaceキーでジャンプ
-        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && controller.isGrounded)
+        // 1. PC: 左Shift または 右Shift
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed)
+            {
+                isDashing = true;
+            }
+        }
+
+        // 2. VR / ゲームパッド: 左スティック押し込み（L3ボタン）
+        if (Gamepad.current != null)
+        {
+            if (Gamepad.current.leftStickButton.isPressed)
+            {
+                isDashing = true;
+            }
+        }
+
+        // ダッシュ中かどうかで速度を切り替え
+        float currentSpeed = isDashing ? dashSpeed : moveSpeed;
+
+        Vector3 move = (transform.right * x + transform.forward * z).normalized;
+        controller.Move(move * currentSpeed * Time.deltaTime);
+
+        // --- 【追加・更新】ジャンプ入力の判定 ---
+        bool isJumpPressed = false;
+
+        // 1. PC: Spaceキー
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            isJumpPressed = true;
+        }
+
+        // 2. VR / ゲームパッド: Aボタン（Gamepad South Button）
+        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame)
+        {
+            isJumpPressed = true;
+        }
+
+        // 地面に接地している状態でジャンプ入力があった場合
+        if (isJumpPressed && controller.isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
+        // 重力適用
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
