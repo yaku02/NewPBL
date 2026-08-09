@@ -2,7 +2,7 @@
 using UnityEngine.InputSystem; // 新しい Input System の名前空間
 
 [RequireComponent(typeof(Rigidbody))]
-public class Buddy : MonoBehaviour
+public class Buddy : MonoBehaviour, IInteractable
 {
     [Header("参照設定")]
     [SerializeField] private Transform playerCamera; // XR Origin > Camera Offset > Main Camera を割り当てる
@@ -26,6 +26,13 @@ public class Buddy : MonoBehaviour
     private float timer;
     private bool isInteracting = false; // インタラクト中フラグ
 
+    public float InteractDistance => interactDistance;
+
+    public void OnInteract(bool interacting)
+    {
+        isInteracting = interacting;
+    }
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -44,32 +51,10 @@ public class Buddy : MonoBehaviour
 
     private void Update()
     {
-        if (playerCamera == null) return;
+        if (playerCamera == null || isInteracting) return;
 
         float distToPlayer = Vector3.Distance(transform.position, playerCamera.position);
 
-        // キー入力判定（Fキー または QuestのAボタン）
-        bool isFKeyPressed = Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
-        bool isAButtonPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
-
-        // Fキー または Aボタン が押されたときに距離チェック
-        if ((isFKeyPressed || isAButtonPressed) && distToPlayer <= interactDistance)
-        {
-            isInteracting = !isInteracting; // フラグを反転
-        }
-
-        // 離れすぎたら自動解除
-        if (isInteracting && distToPlayer > interactDistance + 1.0f)
-        {
-            isInteracting = false;
-        }
-
-        // インタラクト中はこれ以降の追従更新を行わない
-        if (isInteracting) return;
-
-        // --- 【変更点】プレイヤーとの距離チェックと目的地の更新 ---
-
-        // プレイヤーとバディの距離が「maxDistanceFromPlayer」を超えたら即座にプレイヤーの近くを再設定
         if (distToPlayer > maxDistanceFromPlayer)
         {
             timer = 0.0f;
@@ -77,7 +62,6 @@ public class Buddy : MonoBehaviour
         }
         else
         {
-            // 一定時間ごとにもランダムに付近を移動させる
             timer += Time.deltaTime;
             if (timer >= targetChangeInterval)
             {
