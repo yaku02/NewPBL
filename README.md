@@ -6,31 +6,24 @@
 
 ---
 
-## 🌿 開発手順
+## 🔄 実際の開発・作業フロー
 
-作業を開始するときは、必ず最新の `main` からブランチを作成してください。
+プロジェクトのクローンから、作業開始、そして作業終了（プルリクエスト送信）までの一連の流れです。
 
 ### 1. GitHub Desktop を使う場合
 
-1. **ブランチの作成**
-   - 上部メニューの **Current Branch** をクリックします。
-   - **New Branch** ボタンをクリックし、ブランチ名（例: `feature/player-move` や `fix/ui-bug`）を入力して作成します。
-2. **作業・コミット**
-   - Unityで作業を行います。
-   - GitHub Desktopに戻り、左下の **Summary** に変更内容（例: `プレイヤーの移動処理を追加`）を入力して **Commit to [ブランチ名]** を押します。
-3. **GitHubへPush & プルリクエスト作成**
-   - **Publish branch** をクリックしてGitHubへ送信します。
-   - **Create Pull Request** をクリックするとブラウザが開くので、`main` 宛てにプルリクエストを作成します。
+#### 【フェーズ1】クローン（初回のみ）
+1. GitHub Desktop を起動し、**File** ＞ **Clone repository...** を選択します。
+2. リストから `yaku02/NewPBL` を選択し、ローカルの保存先（`Local Path`）を指定して **Clone** を押します。
 
----
+#### 【フェーズ2】作業開始
+1. 上部メニューの **Current Branch** をクリックし、**New Branch** を押します。
+2. ブランチ名（例: `feature/player-jump` など）を入力して **Create Branch** を押します。
+3. Unity Hub からクローンしたフォルダを開き、作業を開始します。
 
-### 2. コマンドライン（PowerShell / Git Bash）を使う場合
-
-1. **最新の main から新しいブランチを作成**
-   ```bash
-   # mainブランチを最新にする
-   git checkout main
-   git pull origin main
-
-   # ブランチを作成して切り替える（ブランチ名は作業内容に合わせて変更）
-   git checkout -b feature/your-feature-name
+#### 【フェーズ3】作業終了
+1. Unityで `Ctrl + S` を押してシーンとプロジェクトを保存します。
+2. GitHub Desktop に戻り、左下の **Summary** に変更内容（例: `プレイヤーのジャンプ処理を追加`）を入力します。
+3. **Commit to [ブランチ名]** をクリックします。
+4. 上部の **Publish branch**（または Push）をクリックしてGitHubへ送信します。
+5. 表示される **Create Pull Request** を押し、ブラウザでプルリクエストを作成します。
