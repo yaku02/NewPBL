@@ -6,6 +6,7 @@ public class SceneManager : MonoBehaviour
 {
     [Header("プレイヤー参照")]
     [SerializeField] private Transform playerCamera; // 判定用のカメラ（頭）
+    [SerializeField] private Transform buddyTransform; // バディのトランスフォーム
     [SerializeField] private Transform playerRig;    // ワープで移動させるプレイヤー根本（XR Origin等）
 
     public enum SceneType
@@ -83,6 +84,7 @@ public class SceneManager : MonoBehaviour
     public void TransportNextScene(SceneType nextScene)
     {
         if (playerCamera == null) return;
+        if (buddyTransform == null) return;
 
         // 移動対象（playerRig がなければ playerCamera を移動）
         Transform targetToMove = playerRig != null ? playerRig : playerCamera;
@@ -108,6 +110,11 @@ public class SceneManager : MonoBehaviour
             // --- プレイヤーのワープ処理 ---
             targetToMove.position = nextAreaData.entrancePoint.position;
             targetToMove.rotation = nextAreaData.entrancePoint.rotation;
+
+            // --- Buddy のワープ処理 ---
+            // プレイヤーと完全に同じ位置・回転にする場合：
+            buddyTransform.position = nextAreaData.entrancePoint.position;
+            buddyTransform.rotation = nextAreaData.entrancePoint.rotation;
 
             // ワープキャンバスを非表示にする
             HideAllWarpCanvases();
