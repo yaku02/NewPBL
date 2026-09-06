@@ -74,8 +74,22 @@ public class EvidenceObject : MonoBehaviour
         // インタラクト用UIは消す
         if (interactCanvas != null) interactCanvas.SetActive(false);
         // 結果UIを表示する
-        if (resultCanvas != null) resultCanvas.SetActive(true);
+        if (resultCanvas != null)
+        {
+            resultCanvas.SetActive(true); // オブジェクト自体をアクティブにする
 
+            // NyonUIコンポーネントを取得してアニメーション実行
+            if (resultCanvas.TryGetComponent<NyonUI>(out var nyonUI))
+            {
+                nyonUI.Show();
+            }
+            else
+            {
+                // もしresultCanvasの「子オブジェクト」にNyonUIがついている場合はこちら
+                nyonUI = resultCanvas.GetComponentInChildren<NyonUI>();
+                if (nyonUI != null) nyonUI.Show();
+            }
+        }
         if (EvidenceManager.Instance == null)
         {
             Debug.Log("EvidenceManagerがnullです");
