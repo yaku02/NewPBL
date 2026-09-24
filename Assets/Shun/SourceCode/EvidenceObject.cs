@@ -3,9 +3,15 @@ using UnityEngine.InputSystem;
 
 public class EvidenceObject : MonoBehaviour
 {
+    [Header("証拠品情報")]
     [SerializeField] private string description = "";
     public string Description => description;
 
+    // ★ UI表示用の画像を持たせる変数（PNGなどの画像アセット）
+    [SerializeField] private Sprite evidenceIcon;
+    public Sprite EvidenceIcon => evidenceIcon;
+
+    [Header("参照・設定")]
     [SerializeField] private Transform playerCamera;
     [SerializeField] private GameObject interactCanvas;
     [SerializeField] private GameObject resultCanvas;
@@ -43,7 +49,6 @@ public class EvidenceObject : MonoBehaviour
         if (!hasInteracted)
         {
             // --- まだインタラクトしていない時 ---
-            // 範囲内にいる場合のみ interactCanvas を表示
             if (interactCanvas != null && interactCanvas.activeSelf != isCloseEnough)
             {
                 interactCanvas.SetActive(isCloseEnough);
@@ -58,7 +63,6 @@ public class EvidenceObject : MonoBehaviour
         else
         {
             // --- インタラクト済みの時 ---
-            // 範囲内にいる場合のみ resultCanvas を表示（離れたら SetActive(false) になる）
             if (resultCanvas != null && resultCanvas.activeSelf != isCloseEnough)
             {
                 resultCanvas.SetActive(isCloseEnough);
@@ -70,32 +74,29 @@ public class EvidenceObject : MonoBehaviour
     {
         hasInteracted = true; // フラグを立てる
 
-        if(targetParticle != null) targetParticle.gameObject.SetActive(false);
-        // インタラクト用UIは消す
+        if (targetParticle != null) targetParticle.gameObject.SetActive(false);
         if (interactCanvas != null) interactCanvas.SetActive(false);
-        // 結果UIを表示する
+
         if (resultCanvas != null)
         {
-            resultCanvas.SetActive(true); // オブジェクト自体をアクティブにする
+            resultCanvas.SetActive(true);
 
-            // NyonUIコンポーネントを取得してアニメーション実行
             if (resultCanvas.TryGetComponent<NyonUI>(out var nyonUI))
             {
                 nyonUI.Show();
             }
             else
             {
-                // もしresultCanvasの「子オブジェクト」にNyonUIがついている場合はこちら
                 nyonUI = resultCanvas.GetComponentInChildren<NyonUI>();
                 if (nyonUI != null) nyonUI.Show();
             }
         }
+
         if (EvidenceManager.Instance == null)
         {
             Debug.Log("EvidenceManagerがnullです");
         }
-        
-        if (EvidenceManager.Instance != null)
+        else
         {
             EvidenceManager.Instance.AddEvidence(this);
         }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using TMPro;
 
@@ -12,11 +13,17 @@ public class EvidenceManager : MonoBehaviour
 
     [Header("UI設定")]
     [SerializeField] private GameObject evidenceListCanvas;
-    [SerializeField] private TextMeshProUGUI evidenceListText;
+
+    // ★ テキストの代わりにボタンの親コンテナとボタンプレハブを指定
+    [SerializeField] private Transform buttonContainer; // ボタンを並べる親要素（Vertical Layout Group等を推奨）
+    [SerializeField] private GameObject evidenceButtonPrefab; // 作成したボタンのプレハブ
+
+    [Header("フォント設定")]
+    [SerializeField] private TMP_FontAsset notoSansFont;
 
     [Header("カメラ設定")]
-    [SerializeField] private Transform playerCamera; // プレイヤーのカメラ（Main Camera / HMD）
-    [SerializeField] private float distanceFromCamera = 1.5f; // カメラからキャンバスまでの距離（メートル）
+    [SerializeField] private Transform playerCamera;
+    [SerializeField] private float distanceFromCamera = 1.5f;
 
     [Header("入力コマンド参照")]
     [SerializeField] private InputCommand inputCommand;
@@ -29,12 +36,11 @@ public class EvidenceManager : MonoBehaviour
 
     private void Start()
     {
-        if(evidenceListCanvas != null)
+        if (evidenceListCanvas != null)
         {
             evidenceListCanvas.SetActive(false);
         }
 
-        // ToggleEvidenceList アクションにイベントを登録
         if (inputCommand != null && inputCommand.ToggleEvidenceList != null)
         {
             inputCommand.ToggleEvidenceList.performed += OnToggleEvidenceListPerformed;
@@ -43,7 +49,6 @@ public class EvidenceManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        // イベント解除（メモリリーク防止）
         if (inputCommand != null && inputCommand.ToggleEvidenceList != null)
         {
             inputCommand.ToggleEvidenceList.performed -= OnToggleEvidenceListPerformed;
@@ -60,18 +65,50 @@ public class EvidenceManager : MonoBehaviour
         if (evidence != null && !collectedEvidences.Contains(evidence))
         {
             collectedEvidences.Add(evidence);
-            UpdateEvidenceText();
+            UpdateEvidenceButtons(); // ★ ボタン一覧を更新
         }
     }
 
-    private void UpdateEvidenceText()
+    // ★ 証拠品ボタンを生成・更新する処理
+    private void UpdateEvidenceButtons()
     {
-        if (evidenceListText == null) return;
-        evidenceListText.text = "";
+        if (buttonContainer == null || evidenceButtonPrefab == null) return;
+
+        foreach (Transform child in buttonContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
         foreach (var evidence in collectedEvidences)
         {
-            evidenceListText.text += $"・ {evidence.name}\n";
+            GameObject buttonObj = Instantiate(evidenceButtonPrefab, buttonContainer);
+
+            TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
+            if (buttonText != null)
+            {
+                buttonText.text = evidence.name;
+
+                // ★ フォントアセットが設定されていれば適用する
+                if (notoSansFont != null)
+                {
+                    buttonText.font = notoSansFont;
+                }
+            }
+
+            Button buttonComponent = buttonObj.GetComponent<Button>();
+            if (buttonComponent != null)
+            {
+                EvidenceObject targetEvidence = evidence;
+                buttonComponent.onClick.AddListener(() => OnEvidenceButtonClicked(targetEvidence));
+            }
         }
+    }
+
+    // ★ 証拠品ボタンが押された時の処理（詳細画面表示など）
+    private void OnEvidenceButtonClicked(EvidenceObject evidence)
+    {
+        Debug.Log($"証拠品が選択されました: {evidence.name}");
+        // ここに詳細モーダルを開く処理などを記述できます
     }
 
     public void ToggleEvidenceUI()
@@ -82,8 +119,8 @@ public class EvidenceManager : MonoBehaviour
 
         if (isActive)
         {
-            UpdateEvidenceText(); //テキスト更新
-            PositionCanvasInFrontOfCamera(); //位置をプレイヤーの目の前に
+            UpdateEvidenceButtons(); // ★ 表示時に最新のボタン一覧を生成
+            PositionCanvasInFrontOfCamera();
 
             evidenceListCanvas.SetActive(true);
 
@@ -118,7 +155,6 @@ public class EvidenceManager : MonoBehaviour
             }
         }
 
-        // カメラの位置から前方（forward）に distanceFromCamera メートル進んだ座標を適用
         evidenceListCanvas.transform.position = playerCamera.position + (playerCamera.forward * distanceFromCamera);
     }
 }
