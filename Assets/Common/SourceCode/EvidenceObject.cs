@@ -7,6 +7,9 @@ public class EvidenceObject : MonoBehaviour
     [SerializeField] private string description = "";
     public string Description => description;
 
+    [SerializeField] private string UIdescription = "";
+    public string UIDescription => UIdescription;
+
     // ★ UI表示用の画像を持たせる変数（PNGなどの画像アセット）
     [SerializeField] private Sprite evidenceIcon;
     public Sprite EvidenceIcon => evidenceIcon;
@@ -15,8 +18,9 @@ public class EvidenceObject : MonoBehaviour
     [SerializeField] private Transform playerCamera;
     [SerializeField] private GameObject interactCanvas;
     [SerializeField] private GameObject resultCanvas;
-    [SerializeField] private Key interactKey = Key.G;
     [SerializeField] private ParticleSystem targetParticle;
+    [SerializeField] private InputCommand inputCommand;
+
     private bool hasInteracted = false; // インタラクト完了フラグ
 
     [Header("Distance Settings")]
@@ -36,6 +40,11 @@ public class EvidenceObject : MonoBehaviour
         {
             resultCanvas.SetActive(false);
         }
+        inputCommand = FindFirstObjectByType<InputCommand>();
+        if (inputCommand == null)
+        {
+            Debug.LogError("シーン内に InputCommand が見つかりません！", this);
+        }
     }
 
     private void Update()
@@ -54,8 +63,12 @@ public class EvidenceObject : MonoBehaviour
                 interactCanvas.SetActive(isCloseEnough);
             }
 
+            bool isInteractPressed = inputCommand != null
+                && inputCommand.Interact != null
+                && inputCommand.Interact.WasPressedThisFrame();
+
             // Gキー入力判定
-            if (isCloseEnough && Keyboard.current != null && Keyboard.current[interactKey].wasPressedThisFrame)
+            if (isCloseEnough && isInteractPressed)
             {
                 Interact();
             }
@@ -99,6 +112,12 @@ public class EvidenceObject : MonoBehaviour
         else
         {
             EvidenceManager.Instance.AddEvidence(this);
+        }
+
+        // ★ シングルトン経由でSEを再生
+        if (SEManager.Instance != null)
+        {
+            SEManager.Instance.PlayInteractSound();
         }
     }
 }

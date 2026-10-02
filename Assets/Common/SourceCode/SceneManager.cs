@@ -9,6 +9,9 @@ public class SceneManager : MonoBehaviour
     [SerializeField] private Transform buddyTransform; // バディのトランスフォーム
     [SerializeField] private Transform playerRig;    // ワープで移動させるプレイヤー根本（XR Origin等）
 
+    [Header("バディ参照")]
+    [SerializeField] private Buddy2 buddy; // バディのスクリプト参照
+
     public enum SceneType
     {
         Office,
@@ -113,8 +116,7 @@ public class SceneManager : MonoBehaviour
 
             // --- Buddy のワープ処理 ---
             // プレイヤーと完全に同じ位置・回転にする場合：
-            buddyTransform.position = nextAreaData.entrancePoint.position;
-            buddyTransform.rotation = nextAreaData.entrancePoint.rotation;
+            buddy.WarpTo(nextAreaData.entrancePoint.position, nextAreaData.entrancePoint.rotation);
 
             // ワープキャンバスを非表示にする
             HideAllWarpCanvases();
