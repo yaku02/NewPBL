@@ -1,11 +1,24 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem; // 新しい Input System の名前空間
+using System;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Buddy : MonoBehaviour, IInteractable
+public class Buddy2 : MonoBehaviour, IInteractable
 {
     [Header("参照設定")]
     [SerializeField] private Transform playerCamera; // XR Origin > Camera Offset > Main Camera を割り当てる
+    [SerializeField] private SceneManager sceneManager; // SceneManager の参照 なくても動作する
+
+    [System.Serializable]
+    public struct SceneCanvasData
+    {
+        public SceneManager.SceneType sceneType;
+        public Canvas choiceCanvas; // 対象シーンで表示する選択肢キャンバス
+    }
+
+    [Header("シーンごとの選択肢キャンバス設定 なくても動作する")]
+    [SerializeField] private List<SceneCanvasData> sceneCanvases = new List<SceneCanvasData>();
 
     [Header("移動・追従設定")]
     public float radius = 3.0f;               // 周回・再配置する外側の半径
@@ -22,15 +35,20 @@ public class Buddy : MonoBehaviour, IInteractable
     [SerializeField] private float lookAtSpeed = 8.0f;       // ビルボード回転の速度
 
     private Rigidbody rb;
-    private Vector3 currentTargetPos; // 【変更】ワールド空間での目標位置
+    private Vector3 currentTargetPos; // ワールド空間での目標位置
     private float timer;
     private bool isInteracting = false; // インタラクト中フラグ
+    private bool isCanvasActive = false; // キャンバス表示中フラグ
 
     public float InteractDistance => interactDistance;
 
     public void OnInteract(bool interacting)
     {
         isInteracting = interacting;
+        if (SEManager.Instance != null)
+        {
+            SEManager.Instance.PlayTalkBuddySound();
+        }
     }
 
     private void Start()
@@ -47,21 +65,40 @@ public class Buddy : MonoBehaviour, IInteractable
         {
             PickNewOffset();
         }
+
+        // 初期状態ではすべての選択肢キャンバスを非アクティブ化
+        HideAllCanvases();
     }
 
     private void Update()
     {
-        if (playerCamera == null || isInteracting) return;
+        // Fキーの入力検知（新しい Input System）
+        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        {
+            ToggleCurrentSceneCanvas();
+        }
+
+        if (playerCamera == null) return;
 
         float distToPlayer = Vector3.Distance(transform.position, playerCamera.position);
 
+        // プレイヤーから十分離れた場合の処理
         if (distToPlayer > maxDistanceFromPlayer)
         {
+            // インタラクト中またはキャンバス表示中であれば解除する
+            if (isInteracting || isCanvasActive)
+            {
+                EndInteraction();
+            }
+
             timer = 0.0f;
             PickNewOffset();
         }
         else
         {
+            // インタラクト中（キャンバス表示中など）はタイマーによる場所移動を行わない
+            if (isInteracting) return;
+
             timer += Time.deltaTime;
             if (timer >= targetChangeInterval)
             {
@@ -82,7 +119,7 @@ public class Buddy : MonoBehaviour, IInteractable
             return;
         }
 
-        // --- 【変更点】固定された目標位置（currentTargetPos）に向かって移動 ---
+        // 固定された目標位置（currentTargetPos）に向かって移動
         float distanceToTarget = Vector3.Distance(rb.position, currentTargetPos);
 
         // 目標位置に十分近づいたらその場に留まる
@@ -137,20 +174,95 @@ public class Buddy : MonoBehaviour, IInteractable
         }
     }
 
-    // 【変更】プレイヤーの現在の位置を基準に、ワールド座標としての新しい目標地点を決定する
+    // プレイヤーの現在の位置を基準に、ワールド座標としての新しい目標地点を決定する
     private void PickNewOffset()
     {
         if (playerCamera == null) return;
 
-        float angle = Random.Range(0f, Mathf.PI * 2f);
-        float currentRadius = Random.Range(cannotInsideRadius, radius);
+        // UnityEngine.Random を明示的に指定
+        float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+        float currentRadius = UnityEngine.Random.Range(cannotInsideRadius, radius);
 
         float x = Mathf.Cos(angle) * currentRadius;
         float z = Mathf.Sin(angle) * currentRadius;
 
         Vector3 center = playerCamera.position + Vector3.up * offsetY;
 
-        // プレイヤーの現在地からの相対位置を「固定のワールド座標」としてセット
-        currentTargetPos = center + new Vector3(x, Random.Range(-0.3f, 0.3f), z);
+        currentTargetPos = center + new Vector3(x, UnityEngine.Random.Range(-0.3f, 0.3f), z);
+    }
+
+    // Fキーが押された時のトグル処理
+    private void ToggleCurrentSceneCanvas()
+    {
+        // キャンバス設定がない場合は通常のインタラクト切り替えのみ行う
+        if (sceneManager == null || sceneCanvases == null || sceneCanvases.Count == 0)
+        {
+            OnInteract(!isInteracting);
+            return;
+        }
+
+        if (isCanvasActive)
+        {
+            EndInteraction();
+            return;
+        }
+
+        SceneManager.SceneType currentScene = sceneManager.currentScene;
+        SceneCanvasData targetData = sceneCanvases.Find(data => data.sceneType == currentScene);
+
+        if (targetData.choiceCanvas != null)
+        {
+            HideAllCanvases();
+            targetData.choiceCanvas.gameObject.SetActive(true);
+            isCanvasActive = true;
+            OnInteract(true);
+        }
+        else
+        {
+            // 該当シーンのキャンバスがなくてもインタラクト自体は実行する
+            OnInteract(!isInteracting);
+        }
+    }
+
+    // インタラクト終了処理（キャンバスを閉じ移動再開状態へ戻す）
+    private void EndInteraction()
+    {
+        HideAllCanvases();
+        isCanvasActive = false;
+        OnInteract(false);
+    }
+
+    // すべてのキャンバスを非表示
+    private void HideAllCanvases()
+    {
+        foreach (var data in sceneCanvases)
+        {
+            if (data.choiceCanvas != null)
+            {
+                data.choiceCanvas.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    public void WarpTo(Vector3 newPosition, Quaternion newRotation)
+    {
+        // 強制的にインタラクトを終了
+        EndInteraction();
+
+        // 物理(Rigidbody)とTransformの両方の位置を即座に書き換える
+        transform.position = newPosition;
+        transform.rotation = newRotation;
+
+        if (rb != null)
+        {
+            rb.position = newPosition;
+            rb.rotation = newRotation;
+            rb.linearVelocity = Vector3.zero; // 旧Velocity: rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // タイマーと目標位置をリセット（ワープ先周辺に目標を再設定）
+        timer = 0.0f;
+        PickNewOffset();
     }
 }
