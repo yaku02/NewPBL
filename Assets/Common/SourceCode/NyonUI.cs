@@ -20,9 +20,22 @@ public class NyonUI : MonoBehaviour
         if (isInitialized) return;
 
         if (rectTransform == null) rectTransform = GetComponent<RectTransform>();
-        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
 
-        defaultScale = rectTransform.localScale; // Inspectorで設定した元のスケールを記憶
+        // ★ CanvasGroup の取得・自動追加処理
+        if (canvasGroup == null)
+        {
+            if (!TryGetComponent<CanvasGroup>(out canvasGroup))
+            {
+                // アタッチされていない場合は自動でコンポーネントを追加する
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
+        if (rectTransform != null)
+        {
+            defaultScale = rectTransform.localScale; // Inspectorで設定した元のスケールを記憶
+        }
+
         isInitialized = true;
     }
 
@@ -30,6 +43,8 @@ public class NyonUI : MonoBehaviour
     {
         // まだ初期化されていない場合は呼び出す
         Initialize();
+
+        if (rectTransform == null || canvasGroup == null) return;
 
         // 途中でアニメーションが呼ばれてもいいように既存のTweenを停止
         rectTransform.DOKill();
@@ -49,8 +64,11 @@ public class NyonUI : MonoBehaviour
         rectTransform.DOScale(defaultScale, 0.35f) // Vector3.one ではなく defaultScale を指定！
             .SetEase(Ease.OutBack)
             .OnComplete(() => {
-                canvasGroup.interactable = true;
-                canvasGroup.blocksRaycasts = true;
+                if (canvasGroup != null)
+                {
+                    canvasGroup.interactable = true;
+                    canvasGroup.blocksRaycasts = true;
+                }
             });
     }
 }

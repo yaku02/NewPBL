@@ -32,6 +32,9 @@ public class EvidenceManager : MonoBehaviour
 
     private GameObject currentDetailModalInstance;
 
+    // ★ 組み合わせ選択中の証拠品を保持する変数
+    private EvidenceObject selectedCombineEvidence = null;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -112,7 +115,7 @@ public class EvidenceManager : MonoBehaviour
         OpenDetailModal(evidence);
     }
 
-    // ★ 詳細モーダルを開き、EvidenceObject の情報を反省させる
+    // ★ 詳細モーダルを開き、EvidenceObject の情報を反映させる
     private void OpenDetailModal(EvidenceObject evidence)
     {
         if (detailModalPrefab == null)
@@ -132,6 +135,20 @@ public class EvidenceManager : MonoBehaviour
 
         // モーダル生成
         currentDetailModalInstance = Instantiate(detailModalPrefab, targetParent);
+
+        // ★ 生成したモーダルの EvidenceDetail に選択した証拠品をセットする
+        if (currentDetailModalInstance.TryGetComponent<EvidenceDetail>(out var detailScript))
+        {
+            detailScript.SetEvidence(evidence);
+        }
+        else
+        {
+            detailScript = currentDetailModalInstance.GetComponentInChildren<EvidenceDetail>();
+            if (detailScript != null)
+            {
+                detailScript.SetEvidence(evidence);
+            }
+        }
 
         // -------------------------------------------------------------
         // 1. 画像（evidenceIcon）のセット
@@ -197,6 +214,123 @@ public class EvidenceManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// モーダルの「使用する」ボタンから呼び出される処理
+    /// </summary>
+    public void OnUseButtonClicked(EvidenceObject evidence)
+    {
+        if (evidence == null) return;
+
+        Debug.Log($"証拠品が使用されました: {evidence.name}");
+
+        // 近くにある（インタラクト範囲内の）EvidenceObject に対して使用通知を送る
+        EvidenceObject[] allEvidences = FindObjectsByType<EvidenceObject>(FindObjectsSortMode.None);
+        foreach (var targetObj in allEvidences)
+        {
+            if (targetObj != null && targetObj.IsPlayerClose())
+            {
+                targetObj.OnEvidenceUsed(evidence);
+            }
+        }
+
+        // モーダルを閉じる
+        CloseDetailModal();
+    }
+
+    /// <summary>
+    /// モーダルの「組み合わせる」ボタンから呼び出される処理
+    /// </summary>
+    public void OnCombineButtonClicked(EvidenceObject evidence)
+    {
+        if (evidence == null) return;
+
+        Debug.Log($"証拠品を組み合わせるが押されました: {evidence.name}");
+
+        // 1回目：まだ誰も選択されていない場合
+        if (selectedCombineEvidence == null)
+        {
+            selectedCombineEvidence = evidence;
+            Debug.Log($"合成の1つ目として [{selectedCombineEvidence.name}] を選択しました。");
+
+            CloseDetailModal();
+            UpdateEvidenceButtons(); // UI上の「[選択中]」表記などを更新
+            return;
+        }
+
+        // 同じアイテムを再度選んだ場合はキャンセル処理
+        if (selectedCombineEvidence == evidence)
+        {
+            Debug.Log("同じ証拠品が選択されたため、組み合わせをキャンセルしました。");
+            selectedCombineEvidence = null;
+            CloseDetailModal();
+            UpdateEvidenceButtons();
+            return;
+        }
+
+        // 2回目：別のアイテムが選ばれたので合成判定を実行
+        TryCombineEvidences(selectedCombineEvidence, evidence);
+    }
+
+    /// <summary>
+    /// 2つの証拠品を合成判定・実行する
+    /// </summary>
+    private void TryCombineEvidences(EvidenceObject first, EvidenceObject second)
+    {
+        bool isSuccess = false;
+
+        // パターンA: first が土台で second が素材
+        if (first.CombineIngredient == second && first.CombineResult != null)
+        {
+            ExecuteCombine(first, second, first.CombineResult);
+            isSuccess = true;
+        }
+        // パターンB: second が土台で first が素材（順不同対応）
+        else if (second.CombineIngredient == first && second.CombineResult != null)
+        {
+            ExecuteCombine(first, second, second.CombineResult);
+            isSuccess = true;
+        }
+
+        if (!isSuccess)
+        {
+            Debug.Log($"[{first.name}] と [{second.name}] は組み合わせられません。");
+            if (SEManager.Instance != null)
+            {
+                SEManager.Instance.PlayErrorSound();
+            }
+        }
+
+        // 選択状態をリセットしてモーダルを閉じる
+        selectedCombineEvidence = null;
+        CloseDetailModal();
+        UpdateEvidenceButtons();
+    }
+
+    private void ExecuteCombine(EvidenceObject first, EvidenceObject second, EvidenceObject result)
+    {
+        Debug.Log($"合成成功！: {first.name} + {second.name} -> {result.name}");
+
+        collectedEvidences.Remove(first);
+        collectedEvidences.Remove(second);
+
+        if (!collectedEvidences.Contains(result))
+        {
+            collectedEvidences.Add(result);
+        }
+
+        // カメラの目の前に ResultCanvas を展開する
+        if (result != null)
+        {
+            result.ShowCombineResultCanvas(playerCamera, distanceFromCamera);
+        }
+
+        if (SEManager.Instance != null)
+        {
+            SEManager.Instance.PlayInteractSound();
+        }
+    }
+
+
     public void CloseDetailModal()
     {
         if (currentDetailModalInstance != null)
@@ -236,6 +370,7 @@ public class EvidenceManager : MonoBehaviour
         }
         else
         {
+            selectedCombineEvidence = null;
             CloseDetailModal();
             evidenceListCanvas.SetActive(false);
         }
@@ -257,5 +392,48 @@ public class EvidenceManager : MonoBehaviour
         }
 
         evidenceListCanvas.transform.position = playerCamera.position + (playerCamera.forward * distanceFromCamera);
+    }
+
+    public bool HasEvidence(EvidenceObject evidence)
+    {
+        return evidence != null && collectedEvidences.Contains(evidence);
+    }
+
+    public bool HasAllEvidences(List<EvidenceObject> requiredEvidences)
+    {
+        if (requiredEvidences == null || requiredEvidences.Count == 0) return true;
+
+        foreach (var req in requiredEvidences)
+        {
+            if (req != null && !collectedEvidences.Contains(req))
+            {
+                return false; // 1つでも足りなければ false
+            }
+        }
+        return true;
+    }
+
+    public void EraseEvidences(List<EvidenceObject> evidencesToErase)
+    {
+        if (evidencesToErase == null || evidencesToErase.Count == 0) return;
+
+        bool hasRemovedAny = false;
+
+        foreach (var evidence in evidencesToErase)
+        {
+            if (evidence != null && collectedEvidences.Contains(evidence))
+            {
+                collectedEvidences.Remove(evidence);
+                hasRemovedAny = true;
+                Debug.Log($"証拠品を削除しました: {evidence.name}");
+            }
+        }
+
+        // 1つ以上削除された場合のみUI更新とモーダル閉じる処理を行う
+        if (hasRemovedAny)
+        {
+            UpdateEvidenceButtons();
+            CloseDetailModal();
+        }
     }
 }
