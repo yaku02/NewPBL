@@ -135,7 +135,7 @@ public class TalkChar : MonoBehaviour
 
         if (SEManager.Instance != null)
         {
-            SEManager.Instance.PlayInteractSound();
+            SEManager.Instance.PlayGetItemSound();
         }
 
         if (talkStartCanvas != null) talkStartCanvas.SetActive(false);
@@ -226,7 +226,7 @@ public class TalkChar : MonoBehaviour
 
         if (SEManager.Instance != null)
         {
-            SEManager.Instance.PlayInteractSound();
+            SEManager.Instance.PlayGetItemSound();
         }
 
         // ‘I‘ðŽˆ‰æ–Ê‚ð•Â‚¶‚é

@@ -11,6 +11,9 @@ public class EvidenceManager : MonoBehaviour
     [SerializeField] private List<EvidenceObject> collectedEvidences = new List<EvidenceObject>();
     public IReadOnlyList<EvidenceObject> CollectedEvidences => collectedEvidences;
 
+    [Header("SE設定")]
+    [SerializeField] private AudioClip openListSE; // EvidenceList表示するときのサウンド
+
     [Header("UI設定")]
     [SerializeField] private GameObject evidenceListCanvas;
     [SerializeField] private Transform buttonContainer;
@@ -356,7 +359,7 @@ public class EvidenceManager : MonoBehaviour
 
         if (SEManager.Instance != null)
         {
-            SEManager.Instance.PlayInteractSound();
+            SEManager.Instance.PlayGetItemSound();
         }
     }
 
@@ -382,9 +385,9 @@ public class EvidenceManager : MonoBehaviour
 
             evidenceListCanvas.SetActive(true);
 
-            if (SEManager.Instance != null)
+            if (SEManager.Instance != null && openListSE != null)
             {
-                SEManager.Instance.PlayInteractSound();
+                SEManager.Instance.PlaySE(openListSE);
             }
 
             if (evidenceListCanvas.TryGetComponent<NyonUI>(out var nyonUI))

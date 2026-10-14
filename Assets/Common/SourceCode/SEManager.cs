@@ -6,7 +6,7 @@ public class SEManager : MonoBehaviour
     public static SEManager Instance { get; private set; }
 
     [Header("サウンド設定")]
-    [SerializeField] private AudioClip interactSound; // インタラクト時の音
+    [SerializeField] private AudioClip getItemSound; // アイテム入手時の音
     [SerializeField] private AudioClip talkBuddySound;
     [SerializeField] private AudioClip errorSound; // エラー時の音
 
@@ -45,9 +45,9 @@ public class SEManager : MonoBehaviour
     /// <summary>
     /// インタラクト用サウンドを再生する
     /// </summary>
-    public void PlayInteractSound()
+    public void PlayGetItemSound()
     {
-        PlaySE(interactSound);
+        PlaySE(getItemSound);
     }
 
     public void PlayTalkBuddySound()
