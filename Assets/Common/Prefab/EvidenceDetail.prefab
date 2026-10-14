@@ -115,7 +115,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
+  m_ActiveFontFeatures: 6e72656bu
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -373,7 +373,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
+  m_ActiveFontFeatures: 6e72656bu
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -585,7 +585,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
+  m_ActiveFontFeatures: 6e72656bu
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -843,7 +843,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
+  m_ActiveFontFeatures: 6e72656bu
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -881,6 +881,7 @@ GameObject:
   - component: {fileID: 8447558818416004528}
   - component: {fileID: 6716272993500748258}
   - component: {fileID: 985417231485105444}
+  - component: {fileID: 5524741530874361797}
   m_Layer: 5
   m_Name: EvidenceDetail
   m_TagString: Untagged
@@ -930,6 +931,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1038,3 +1040,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EvidenceDetail
   useButton: {fileID: 7727709111068296066}
   combineButton: {fileID: 4974467745500109383}
+--- !u!114 &5524741530874361797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8328202597415196759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8d6d13fef9b1dc4a99176837264b994, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlideUI
+  canvasGroup: {fileID: 0}
+  rectTransform: {fileID: 0}
+  direction: 1
+  slideDistance: 400
+  duration: 0.7
+  easeType: 9

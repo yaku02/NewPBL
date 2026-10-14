@@ -13475,7 +13475,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1014111199}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51efabd3fd28bac45b43ffd607a63c65, type: 3}
   m_Name: 
@@ -14044,7 +14044,7 @@ MonoBehaviour:
   detailModalParent: {fileID: 0}
   notoSansFont: {fileID: 0}
   playerCamera: {fileID: 65596512}
-  distanceFromCamera: 1.5
+  distanceFromCamera: 1
   inputCommand: {fileID: 1653556350}
   wallOffset: 0.1
   obstacleLayer:
