@@ -13,11 +13,9 @@
    cd /UnityProjects/NewPBL
 最新のソースコードを取得して main ブランチを更新します。
 
-Bash
 git pull origin main
 作業用ブランチを作成して切り替えます。
 
-Bash
 git checkout -b feature/anim
 💡 feature/anim の部分は作業内容に合わせて変更してください（例: feature/player-movement, fix/ui-bug など）。
 
@@ -27,7 +25,6 @@ Unity を起動して作業を開始します。
 0. 巨大ファイルのチェック（容量確認）
 容量の大きなファイルを追加した場合は、PowerShell で以下を実行して 100MB を超えるファイルがないか確認 してください。
 
-PowerShell
 Get-ChildItem -Recurse -File -Exclude .git | Where-Object { $_.Length -gt 100MB } | Select-Object FullName, @{Name="Size(MB)";Expression={[math]::round($_.Length/1MB, 2)}}
 Library フォルダなど .gitignore 設定済みのファイルのみ検出された場合
 
@@ -40,17 +37,14 @@ Library フォルダなど .gitignore 設定済みのファイルのみ検出さ
 1〜3. Git への記録と送信
 変更内容をステージングします。
 
-Bash
 git add .
 コミットします。
 
-Bash
 git commit -m "アニメーションを追加"
 💡 "" の中は作業内容が伝わるメッセージに変更してください。
 
 作成したブランチをリモートにプッシュします。
 
-Bash
 git push origin feature/anim
 💡 feature/anim 部分はフェーズ 1 で作成したブランチ名に合わせて変更してください。
 
