@@ -1,29 +1,25 @@
 # NewPBL
 
-## 🛠 開発ルール
-`main` ブランチへの直接コミット・Pushは禁止です。  
-作業（機能追加・バグ修正など）を行う際は、**必ず新しいブランチを作成（ブランチを切る）** して作業してください。
-
----
 
 ## 🔄 実際の開発・作業フロー
+【フェーズ1】作業を始める前に
+1 powerShellでプロジェクトフォルダに移動します('cd /UnityProjects/NewPBL'など)
+2 **git pull origin main**をし、手元のmainを更新します
+3 **git checkout -b (feature/anim)** ()の中身は作業内容に合わせて変えてください
+4 Unityを開いて作業してください
 
-プロジェクトのクローンから、作業開始、そして作業終了（プルリクエスト送信）までの一連の流れです。
+【フェーズ2】作業を終えたら
+0 (容量の大きいファイルを追加した場合)
+Get-ChildItem -Recurse -File -Exclude .git | Where-Object { $_.Length -gt 100MB } | Select-Object FullName, @{Name="Size(MB)";Expression={[math]::round($_.Length/1MB, 2)}}
+をpowerShellで実行して100MGを超えるファイルがないか確認してください
+→ Libraryフォルダなどgitignoreに設定したファイルのみが出てきた場合は無視でいいです
+→ gitignoreに設定していないファイルがある場合は連絡して
 
-### 1. GitHub Desktop を使う場合
+1 **git add .**をしてください
+2 **git commit -m "アニメーションを追加"** (""の中身は作業内容に合わせて)をしてください
+3 **git push origin (feature/anim)** ()の中身は3で作成したブランチの名前にしてください
 
-#### 【フェーズ1】クローン（初回のみ）
-1. GitHub Desktop を起動し、**File** ＞ **Clone repository...** を選択します。
-2. リストから `yaku02/NewPBL` を選択し、ローカルの保存先（`Local Path`）を指定して **Clone** を押します。
+【フェーズ3】mainブランチに合流させます
+1 mainに合流してほしい場合は連絡して
 
-#### 【フェーズ2】作業開始
-1. 上部メニューの **Current Branch** をクリックし、**New Branch** を押します。
-2. ブランチ名（例: `feature/player-jump` など）を入力して **Create Branch** を押します。
-3. Unity Hub からクローンしたフォルダを開き、作業を開始します。
-
-#### 【フェーズ3】作業終了
-1. Unityで `Ctrl + S` を押してシーンとプロジェクトを保存します。
-2. GitHub Desktop に戻り、左下の **Summary** に変更内容（例: `プレイヤーのジャンプ処理を追加`）を入力します。
-3. **Commit to [ブランチ名]** をクリックします。
-4. 上部の **Publish branch**（または Push）をクリックしてGitHubへ送信します。
-5. 表示される **Create Pull Request** を押し、ブラウザでプルリクエストを作成します。
+フェーズ1に戻って作業してください
