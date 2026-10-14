@@ -16,9 +16,17 @@ public class EvidenceManager : MonoBehaviour
     [SerializeField] private Transform buttonContainer;
     [SerializeField] private GameObject evidenceButtonPrefab;
 
+    [Header("ボタンハイライト設定")]
+    [Tooltip("1つ目に選択中のボタン全体の色（グレー）")]
+    [SerializeField] private Color selectedBgColor = new Color(0.4f, 0.4f, 0.4f, 1f);
+    [Tooltip("組み合わせ可能なボタンの縁（Outline）の色")]
+    [SerializeField] private Color combinableOutlineColor = new Color(0.2f, 1f, 0.2f, 1f);
+    [Tooltip("通常時のボタン背景色")]
+    [SerializeField] private Color defaultBgColor = Color.white;
+
     [Header("詳細表示UI設定")]
-    [SerializeField] private GameObject detailModalPrefab; // ★ 詳細表示用プレハブ
-    [SerializeField] private Transform detailModalParent;  // ★ モーダルの親要素（未設定時は evidenceListCanvas 内）
+    [SerializeField] private GameObject detailModalPrefab;
+    [SerializeField] private Transform detailModalParent;
 
     [Header("フォント設定")]
     [SerializeField] private TMP_FontAsset notoSansFont;
@@ -30,9 +38,15 @@ public class EvidenceManager : MonoBehaviour
     [Header("入力コマンド参照")]
     [SerializeField] private InputCommand inputCommand;
 
+    [Header("壁回避設定")]
+    [Tooltip("壁に埋まらないように手前に移動させるオフセット（離す距離）")]
+    [SerializeField] private float wallOffset = 0.1f;
+    [Tooltip("壁判定を行うレイヤー（未設定時はすべてのレイヤー）")]
+    [SerializeField] private LayerMask obstacleLayer = ~0;
+
     private GameObject currentDetailModalInstance;
 
-    // ★ 組み合わせ選択中の証拠品を保持する変数
+    // 組み合わせ選択中の証拠品を保持する変数
     private EvidenceObject selectedCombineEvidence = null;
 
     private void Awake()
@@ -92,12 +106,56 @@ public class EvidenceManager : MonoBehaviour
             TMP_Text buttonText = buttonObj.GetComponentInChildren<TMP_Text>();
             if (buttonText != null)
             {
-                buttonText.text = evidence.name;
+                if (evidence == selectedCombineEvidence)
+                {
+                    buttonText.text = $"{evidence.name} [選択中]";
+                }
+                else if (selectedCombineEvidence != null && CanCombineWith(selectedCombineEvidence, evidence))
+                {
+                    buttonText.text = $"{evidence.name} ✨";
+                }
+                else
+                {
+                    buttonText.text = evidence.name;
+                }
 
                 if (notoSansFont != null)
                 {
                     buttonText.font = notoSansFont;
                 }
+            }
+
+            // ★ 1. ボタン背景（Image）の背景色設定
+            Image buttonImage = buttonObj.GetComponent<Image>();
+            if (buttonImage != null)
+            {
+                if (evidence == selectedCombineEvidence)
+                {
+                    buttonImage.color = selectedBgColor; // 選択中は全体をグレーに
+                }
+                else
+                {
+                    buttonImage.color = defaultBgColor;  // 通常色
+                }
+            }
+
+            // ★ 2. ボタンの縁（Outline）の設定
+            Outline outline = buttonObj.GetComponent<Outline>();
+            if (outline == null)
+            {
+                // コンポーネントがなければ追加する
+                outline = buttonObj.AddComponent<Outline>();
+                outline.effectDistance = new Vector2(3f, -3f); // 縁の太さ
+            }
+
+            if (selectedCombineEvidence != null && CanCombineWith(selectedCombineEvidence, evidence))
+            {
+                outline.enabled = true;
+                outline.effectColor = combinableOutlineColor; // 組み合わせ可能なアイテムのみ縁を光らせる
+            }
+            else
+            {
+                outline.enabled = false; // 通常時・選択中は縁を非表示
             }
 
             Button buttonComponent = buttonObj.GetComponent<Button>();
@@ -109,13 +167,22 @@ public class EvidenceManager : MonoBehaviour
         }
     }
 
+    private bool CanCombineWith(EvidenceObject first, EvidenceObject second)
+    {
+        if (first == null || second == null) return false;
+
+        bool isPatternA = (first.CombineIngredient == second && first.CombineResult != null);
+        bool isPatternB = (second.CombineIngredient == first && second.CombineResult != null);
+
+        return isPatternA || isPatternB;
+    }
+
     private void OnEvidenceButtonClicked(EvidenceObject evidence)
     {
         Debug.Log($"証拠品が選択されました: {evidence.name}");
         OpenDetailModal(evidence);
     }
 
-    // ★ 詳細モーダルを開き、EvidenceObject の情報を反映させる
     private void OpenDetailModal(EvidenceObject evidence)
     {
         if (detailModalPrefab == null)
@@ -124,19 +191,14 @@ public class EvidenceManager : MonoBehaviour
             return;
         }
 
-        // 既存のモーダルがあれば削除
         if (currentDetailModalInstance != null)
         {
             Destroy(currentDetailModalInstance);
         }
 
-        // 生成先を決定
         Transform targetParent = detailModalParent != null ? detailModalParent : evidenceListCanvas.transform;
-
-        // モーダル生成
         currentDetailModalInstance = Instantiate(detailModalPrefab, targetParent);
 
-        // ★ 生成したモーダルの EvidenceDetail に選択した証拠品をセットする
         if (currentDetailModalInstance.TryGetComponent<EvidenceDetail>(out var detailScript))
         {
             detailScript.SetEvidence(evidence);
@@ -150,9 +212,6 @@ public class EvidenceManager : MonoBehaviour
             }
         }
 
-        // -------------------------------------------------------------
-        // 1. 画像（evidenceIcon）のセット
-        // -------------------------------------------------------------
         Image iconImage = currentDetailModalInstance.transform.Find("EvidenceIcon")?.GetComponent<Image>();
         if (iconImage == null)
         {
@@ -168,14 +227,10 @@ public class EvidenceManager : MonoBehaviour
             }
             else
             {
-                // 画像が設定されていない場合は非表示（またはデフォルト画像にする）
                 iconImage.enabled = false;
             }
         }
 
-        // -------------------------------------------------------------
-        // 2. 証拠品名（TitleText）のセット
-        // -------------------------------------------------------------
         TMP_Text titleText = currentDetailModalInstance.transform.Find("TitleText")?.GetComponent<TMP_Text>();
         if (titleText != null)
         {
@@ -183,9 +238,6 @@ public class EvidenceManager : MonoBehaviour
             if (notoSansFont != null) titleText.font = notoSansFont;
         }
 
-        // -------------------------------------------------------------
-        // 3. 説明文（DescriptionText）のセット
-        // -------------------------------------------------------------
         TMP_Text descriptionText = currentDetailModalInstance.transform.Find("DescriptionText")?.GetComponent<TMP_Text>();
         if (descriptionText != null)
         {
@@ -193,9 +245,6 @@ public class EvidenceManager : MonoBehaviour
             if (notoSansFont != null) descriptionText.font = notoSansFont;
         }
 
-        // -------------------------------------------------------------
-        // 4. 閉じるボタン（CloseButton）の設定
-        // -------------------------------------------------------------
         Button closeButton = currentDetailModalInstance.transform.Find("CloseButton")?.GetComponent<Button>();
         if (closeButton == null)
         {
@@ -207,23 +256,18 @@ public class EvidenceManager : MonoBehaviour
             closeButton.onClick.AddListener(CloseDetailModal);
         }
 
-        // NyonUI などのアニメーション対応
         if (currentDetailModalInstance.TryGetComponent<NyonUI>(out var nyonUI))
         {
             nyonUI.Show();
         }
     }
 
-    /// <summary>
-    /// モーダルの「使用する」ボタンから呼び出される処理
-    /// </summary>
     public void OnUseButtonClicked(EvidenceObject evidence)
     {
         if (evidence == null) return;
 
         Debug.Log($"証拠品が使用されました: {evidence.name}");
 
-        // 近くにある（インタラクト範囲内の）EvidenceObject に対して使用通知を送る
         EvidenceObject[] allEvidences = FindObjectsByType<EvidenceObject>(FindObjectsSortMode.None);
         foreach (var targetObj in allEvidences)
         {
@@ -233,31 +277,25 @@ public class EvidenceManager : MonoBehaviour
             }
         }
 
-        // モーダルを閉じる
         CloseDetailModal();
     }
 
-    /// <summary>
-    /// モーダルの「組み合わせる」ボタンから呼び出される処理
-    /// </summary>
     public void OnCombineButtonClicked(EvidenceObject evidence)
     {
         if (evidence == null) return;
 
         Debug.Log($"証拠品を組み合わせるが押されました: {evidence.name}");
 
-        // 1回目：まだ誰も選択されていない場合
         if (selectedCombineEvidence == null)
         {
             selectedCombineEvidence = evidence;
             Debug.Log($"合成の1つ目として [{selectedCombineEvidence.name}] を選択しました。");
 
             CloseDetailModal();
-            UpdateEvidenceButtons(); // UI上の「[選択中]」表記などを更新
+            UpdateEvidenceButtons();
             return;
         }
 
-        // 同じアイテムを再度選んだ場合はキャンセル処理
         if (selectedCombineEvidence == evidence)
         {
             Debug.Log("同じ証拠品が選択されたため、組み合わせをキャンセルしました。");
@@ -267,24 +305,18 @@ public class EvidenceManager : MonoBehaviour
             return;
         }
 
-        // 2回目：別のアイテムが選ばれたので合成判定を実行
         TryCombineEvidences(selectedCombineEvidence, evidence);
     }
 
-    /// <summary>
-    /// 2つの証拠品を合成判定・実行する
-    /// </summary>
     private void TryCombineEvidences(EvidenceObject first, EvidenceObject second)
     {
         bool isSuccess = false;
 
-        // パターンA: first が土台で second が素材
         if (first.CombineIngredient == second && first.CombineResult != null)
         {
             ExecuteCombine(first, second, first.CombineResult);
             isSuccess = true;
         }
-        // パターンB: second が土台で first が素材（順不同対応）
         else if (second.CombineIngredient == first && second.CombineResult != null)
         {
             ExecuteCombine(first, second, second.CombineResult);
@@ -300,7 +332,6 @@ public class EvidenceManager : MonoBehaviour
             }
         }
 
-        // 選択状態をリセットしてモーダルを閉じる
         selectedCombineEvidence = null;
         CloseDetailModal();
         UpdateEvidenceButtons();
@@ -318,7 +349,6 @@ public class EvidenceManager : MonoBehaviour
             collectedEvidences.Add(result);
         }
 
-        // カメラの目の前に ResultCanvas を展開する
         if (result != null)
         {
             result.ShowCombineResultCanvas(playerCamera, distanceFromCamera);
@@ -329,7 +359,6 @@ public class EvidenceManager : MonoBehaviour
             SEManager.Instance.PlayInteractSound();
         }
     }
-
 
     public void CloseDetailModal()
     {
@@ -391,7 +420,22 @@ public class EvidenceManager : MonoBehaviour
             }
         }
 
-        evidenceListCanvas.transform.position = playerCamera.position + (playerCamera.forward * distanceFromCamera);
+        Vector3 origin = playerCamera.position;
+        Vector3 direction = playerCamera.forward;
+        float targetDistance = distanceFromCamera;
+
+        // カメラ正面に向かって Raycast を飛ばし、壁があるかチェック
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, distanceFromCamera, obstacleLayer))
+        {
+            // 壁に当たった場合、衝突点より少し手前（wallOffset 分）に配置距離を縮める
+            targetDistance = Mathf.Max(0.2f, hit.distance - wallOffset);
+        }
+
+        // 決定した距離に Canvas を配置
+        evidenceListCanvas.transform.position = origin + (direction * targetDistance);
+
+        // Canvas をカメラの正面に向かせる（視線に対して平行にする場合）
+        evidenceListCanvas.transform.rotation = Quaternion.LookRotation(direction);
     }
 
     public bool HasEvidence(EvidenceObject evidence)
@@ -407,7 +451,7 @@ public class EvidenceManager : MonoBehaviour
         {
             if (req != null && !collectedEvidences.Contains(req))
             {
-                return false; // 1つでも足りなければ false
+                return false;
             }
         }
         return true;
@@ -429,7 +473,6 @@ public class EvidenceManager : MonoBehaviour
             }
         }
 
-        // 1つ以上削除された場合のみUI更新とモーダル閉じる処理を行う
         if (hasRemovedAny)
         {
             UpdateEvidenceButtons();
