@@ -5,6 +5,8 @@ public class OptionCanvasManager : MonoBehaviour
 {
     [Header("UI設定")]
     [SerializeField] private GameObject optionCanvas;
+    [SerializeField] private AudioClip openCanvasSE; // 効果音
+
 
     [Header("カメラ設定")]
     [SerializeField] private Transform playerCamera; // プレイヤーのカメラ（Main Camera / HMD）
@@ -61,6 +63,11 @@ public class OptionCanvasManager : MonoBehaviour
             {
                 nyonUI = optionCanvas.GetComponentInChildren<NyonUI>();
                 if (nyonUI != null) nyonUI.Show();
+            }
+
+            if (SEManager.Instance != null && openCanvasSE != null)
+            {
+                SEManager.Instance.PlaySE(openCanvasSE);
             }
         }
         else

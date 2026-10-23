@@ -258,7 +258,7 @@ public class EvidenceObject : MonoBehaviour
 
         if (SEManager.Instance != null)
         {
-            SEManager.Instance.PlayInteractSound();
+            SEManager.Instance.PlayGetItemSound();
         }
     }
 

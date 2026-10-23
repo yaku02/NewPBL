@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // TextMeshPro を使用する場合（通常の UI Text の場合は UnityEngine.UI.Text に変更可）
+using TMPro; // TextMeshPro を使用する場合
 using UnityEngine.InputSystem;
 
 public class TalkChar : MonoBehaviour
@@ -13,8 +13,12 @@ public class TalkChar : MonoBehaviour
         [Tooltip("選択肢に表示するテキスト")]
         public string choiceText = "選択肢";
 
-        [Tooltip("この選択肢を表示可能にするフラグ")]
+        [Tooltip("手動、または証拠品によってこの選択肢を表示可能にするフラグ")]
         public bool isAvailable = true;
+
+        [Header("証拠品による解放条件")]
+        [Tooltip("ここに設定したすべての証拠品を所持している場合、自動的に isAvailable が true になります（空の場合は手動設定に従います）")]
+        public List<EvidenceObject> requiredEvidences;
 
         [Tooltip("この選択肢を選択した際に表示する固有のキャンバス")]
         public GameObject resultCanvasForThisChoice;
@@ -135,15 +139,37 @@ public class TalkChar : MonoBehaviour
 
         if (SEManager.Instance != null)
         {
-            SEManager.Instance.PlayInteractSound();
+            SEManager.Instance.PlayGetItemSound();
         }
 
         if (talkStartCanvas != null) talkStartCanvas.SetActive(false);
+
+        // ★ 会話開始時に、証拠品の所持状況を元に選択肢の解放状態を自動更新する
+        UpdateChoiceAvailabilities();
 
         // 選択肢ボタンの動的生成
         GenerateChoiceButtons();
 
         if (choiceCanvas != null) choiceCanvas.SetActive(true);
+    }
+
+    /// <summary>
+    /// 設定された requiredEvidences をすべて持っているか確認し、isAvailable を自動更新する
+    /// </summary>
+    private void UpdateChoiceAvailabilities()
+    {
+        foreach (var choice in choices)
+        {
+            // requiredEvidences が設定されている場合のみ自動判定を行う
+            if (choice.requiredEvidences != null && choice.requiredEvidences.Count > 0)
+            {
+                if (EvidenceManager.Instance != null)
+                {
+                    // すべて持っていれば true、足りなければ false に更新
+                    choice.isAvailable = EvidenceManager.Instance.HasAllEvidences(choice.requiredEvidences);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -191,7 +217,6 @@ public class TalkChar : MonoBehaviour
                     string displayText = !string.IsNullOrEmpty(data.dummyText) ? data.dummyText : data.choiceText;
                     SetButtonText(dummyObj, displayText);
 
-                    
                     Button dummyButton = dummyObj.GetComponent<Button>();
                 }
             }
@@ -226,7 +251,7 @@ public class TalkChar : MonoBehaviour
 
         if (SEManager.Instance != null)
         {
-            SEManager.Instance.PlayInteractSound();
+            SEManager.Instance.PlayGetItemSound();
         }
 
         // 選択肢画面を閉じる

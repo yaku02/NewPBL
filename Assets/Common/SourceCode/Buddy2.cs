@@ -17,6 +17,10 @@ public class Buddy2 : MonoBehaviour, IInteractable
         public Canvas choiceCanvas; // 対象シーンで表示する選択肢キャンバス
     }
 
+    [Header("サウンド設定")]
+    [SerializeField] private AudioClip talkSE; // 会話時のSE
+
+
     [Header("シーンごとの選択肢キャンバス設定 なくても動作する")]
     [SerializeField] private List<SceneCanvasData> sceneCanvases = new List<SceneCanvasData>();
 
@@ -45,9 +49,9 @@ public class Buddy2 : MonoBehaviour, IInteractable
     public void OnInteract(bool interacting)
     {
         isInteracting = interacting;
-        if (SEManager.Instance != null)
+        if (SEManager.Instance != null && talkSE != null)
         {
-            SEManager.Instance.PlayTalkBuddySound();
+            SEManager.Instance.PlaySE(talkSE);
         }
     }
 
