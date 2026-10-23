@@ -14,6 +14,12 @@ public class NyonUI : MonoBehaviour
         Initialize();
     }
 
+    // または、オブジェクトがアクティブ（SetActive(true)）になるたびにアニメーションさせたい場合
+    private void OnEnable()
+    {
+        Show();
+    }
+
     // 初期状態のスケールを保存する処理
     private void Initialize()
     {
