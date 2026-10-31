@@ -42,13 +42,17 @@ public class EvidenceObject : MonoBehaviour
     [Tooltip("このアイテムを入手するために必要な証拠品（複数設定可能）")]
     [SerializeField] private List<EvidenceObject> requiredEvidences = new List<EvidenceObject>();
 
+    [Header("入手成功時設定")]
+    [Tooltip("条件を満たして入手した際に再生する専用サウンド（未設定の場合は即時Interactを実行します）")]
+    [SerializeField] private AudioClip successSound;
+
     private HashSet<EvidenceObject> usedEvidences = new HashSet<EvidenceObject>();
 
     private bool hasInteracted = false; // インタラクト完了フラグ
     private bool hasFailed = false;
 
     [Header("Distance Settings")]
-    [SerializeField] private float interactDistance = 1.5f;
+    [SerializeField] private float interactDistance = 3.0f;
 
     private float sqrInteractDistance;
 
@@ -85,15 +89,28 @@ public class EvidenceObject : MonoBehaviour
 
     private void Update()
     {
-        if (isCombineResult) return;
         if (InteractDetector.Instance == null) return;
 
-        // 1. 距離＆視線上に捉えているかのフラグ（UI表示用）
-        bool isTargeted = InteractDetector.Instance.CanInteract(transform);
+        // --- 1. 合成アイテム（isCombineResult = true）の距離制御 ---
+        if (isCombineResult)
+        {
+            if (resultCanvas != null && resultCanvas.activeSelf)
+            {
+                // ★ 本体ではなく resultCanvas の位置とプレイヤーカメラ間の距離で判定する
+                bool isCloseEnough = InteractDetector.Instance.IsCloseEnough(resultCanvas.transform, interactDistance);
+                if (!isCloseEnough)
+                {
+                    resultCanvas.SetActive(false);
+                }
+            }
+            return;
+        }
+
+        // --- 2. 通常の証拠品（フィールド設置型）の処理 ---
+        bool isTargeted = InteractDetector.Instance.CanInteract(transform, true, interactDistance);
 
         if (!hasInteracted)
         {
-            // UIの表示切り替え
             if (interactCanvas != null && interactCanvas.activeSelf != isTargeted)
             {
                 interactCanvas.SetActive(isTargeted);
@@ -104,8 +121,7 @@ public class EvidenceObject : MonoBehaviour
                 failedCanvas.SetActive(false);
             }
 
-            // ★ 2. 「狙いを定めていて、かつボタンが押されたか」を1行で判定！
-            if (InteractDetector.Instance.WasInteracted(transform))
+            if (InteractDetector.Instance.WasInteracted(transform, true, interactDistance))
             {
                 if (CanInteract())
                 {
@@ -124,7 +140,7 @@ public class EvidenceObject : MonoBehaviour
         }
         else
         {
-            bool isCloseEnough = InteractDetector.Instance.IsCloseEnough(transform);
+            bool isCloseEnough = InteractDetector.Instance.IsCloseEnough(transform, interactDistance);
 
             if (resultCanvas != null && resultCanvas.activeSelf != isCloseEnough)
             {
@@ -142,8 +158,11 @@ public class EvidenceObject : MonoBehaviour
 
         if (targetCamera != null)
         {
-            // カメラの正面の位置・回転に配置
-            resultCanvas.transform.position = targetCamera.position + (targetCamera.forward * distanceFromCamera);
+            // ★ 本体（transform）の位置も一緒に移動させておくとより安全です
+            transform.position = targetCamera.position + (targetCamera.forward * distanceFromCamera);
+
+            // キャンバスの位置・回転を設定
+            resultCanvas.transform.position = transform.position;
             resultCanvas.transform.rotation = Quaternion.LookRotation(targetCamera.forward);
         }
 
@@ -241,7 +260,14 @@ public class EvidenceObject : MonoBehaviour
 
         if (SEManager.Instance != null)
         {
-            SEManager.Instance.PlayGetItemSound();
+            if(successSound != null)
+            {
+                SEManager.Instance.PlaySE(successSound);
+            }
+            else
+            {
+                SEManager.Instance.PlayGetItemSound();
+            }
         }
     }
 
