@@ -52,7 +52,7 @@ public class TalkChar : MonoBehaviour
 
     private void Start()
     {
-        CloseAllCanvas();
+        StopTalking();
 
         if (playerCamera == null)
         {
@@ -77,16 +77,23 @@ public class TalkChar : MonoBehaviour
     {
         if (InteractDetector.Instance == null) return;
 
-        // --- 1. 結果キャンバス（currentResultCanvas）表示中の処理 ---
-        if (currentResultCanvas != null && currentResultCanvas.activeSelf)
+        // --- 1. 会話中（選択肢表示中 または 結果キャンバス表示中）の処理 ---
+        if (isTalking || (currentResultCanvas != null && currentResultCanvas.activeSelf))
         {
             // ★ Raycast（視線）は無視し、距離（3.0m）のみで判定
             bool isClose = InteractDetector.Instance.IsCloseEnough(transform, 3.0f);
 
             if (!isClose)
             {
-                // 3.0m 以上離れたらキャンバスを閉じる
-                CloseAllCanvas();
+                // 3.0m 以上離れたら会話状態を解除してキャンバスを閉じる
+                StopTalking();
+                return;
+            }
+
+            // 会話中（または結果表示中）にもう一度インタラクトキーが押されたら解除
+            if (InteractDetector.Instance.IsInteractPressed())
+            {
+                StopTalking();
                 return;
             }
 
@@ -95,31 +102,10 @@ public class TalkChar : MonoBehaviour
             return;
         }
 
-        // --- 2. 通常の会話・会話前の処理（距離 3.0m ＋ Raycast判定） ---
+        // --- 2. 会話前の判定（距離 3.0m ＋ Raycast判定） ---
         bool isCloseAndLooking = InteractDetector.Instance.CanInteract(transform, true, 3.0f);
 
-        // 会話中（isTalking）の処理
-        if (isTalking)
-        {
-            // 会話中に 3.0m 離れるか視線が外れた場合、キャンバスを閉じる
-            if (!isCloseAndLooking)
-            {
-                CloseAllCanvas();
-                return;
-            }
-
-            // 会話中にもう一度インタラクトキーが押されたら解除
-            if (InteractDetector.Instance.IsInteractPressed())
-            {
-                CloseAllCanvas();
-                return;
-            }
-
-            LookAtPlayer();
-            return;
-        }
-
-        // 会話前の処理（視線外または 3.0m 外ならUI非表示）
+        // 会話前のUI制御（視線外または 3.0m 外なら非表示）
         if (!isCloseAndLooking)
         {
             if (talkStartCanvas != null && talkStartCanvas.activeSelf)
@@ -135,7 +121,7 @@ public class TalkChar : MonoBehaviour
             talkStartCanvas.SetActive(true);
         }
 
-        // 会話開始の入力判定（距離 3.0m ＆ 視線OK ＋ キー入力）
+        // --- 3. 会話開始の入力判定（距離 3.0m ＆ 視線OK ＋ キー入力） ---
         if (InteractDetector.Instance.WasInteracted(transform, true, 3.0f))
         {
             Interact();
@@ -294,7 +280,7 @@ public class TalkChar : MonoBehaviour
         generatedButtons.Clear();
     }
 
-    public void CloseAllCanvas()
+    public void StopTalking()
     {
         isTalking = false;
 
