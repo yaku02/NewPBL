@@ -25,7 +25,6 @@ public class EvidenceObject : MonoBehaviour
     [SerializeField] private GameObject interactCanvas;
     [SerializeField] private GameObject resultCanvas;
     [SerializeField] private ParticleSystem targetParticle;
-    [SerializeField] private InputCommand inputCommand;
 
     [Header("合成設定")]
     [Tooltip("合成で手に入るアイテムの場合は true（距離判定を行わず、合成時にResultCanvasを表示）")]
@@ -53,6 +52,18 @@ public class EvidenceObject : MonoBehaviour
 
     private float sqrInteractDistance;
 
+    private void Awake()
+    {
+        // 自身または子要素に Collider が存在するかチェック
+        Collider col = GetComponentInChildren<Collider>();
+        if (col == null)
+        {
+            // なければ自身に BoxCollider を追加して isTrigger を true にする
+            BoxCollider boxCol = gameObject.AddComponent<BoxCollider>();
+            boxCol.isTrigger = true;
+        }
+    }
+
     private void Start()
     {
         sqrInteractDistance = interactDistance * interactDistance;
@@ -65,11 +76,7 @@ public class EvidenceObject : MonoBehaviour
         {
             resultCanvas.SetActive(false);
         }
-        inputCommand = FindFirstObjectByType<InputCommand>();
-        if (inputCommand == null)
-        {
-            Debug.LogError("シーン内に InputCommand が見つかりません！", this);
-        }
+
         if (failedCanvas != null)
         {
             failedCanvas.SetActive(false);
@@ -79,42 +86,28 @@ public class EvidenceObject : MonoBehaviour
     private void Update()
     {
         if (isCombineResult) return;
-        if (playerCamera == null) return;
+        if (InteractDetector.Instance == null) return;
 
-        // 二乗距離計算
-        float sqrDistance = (playerCamera.position - transform.position).sqrMagnitude;
-        bool isCloseEnough = sqrDistance <= sqrInteractDistance;
+        // 1. 距離＆視線上に捉えているかのフラグ（UI表示用）
+        bool isTargeted = InteractDetector.Instance.CanInteract(transform);
 
         if (!hasInteracted)
         {
-            // --- まだインタラクトしていない時 ---
-            bool canInteract = CanInteract();
-
-            if (interactCanvas != null)
+            // UIの表示切り替え
+            if (interactCanvas != null && interactCanvas.activeSelf != isTargeted)
             {
-                // 近づいている時だけキャンバスを表示
-                bool shouldShowCanvas = isCloseEnough;
-                if (interactCanvas.activeSelf != shouldShowCanvas)
-                {
-                    interactCanvas.SetActive(shouldShowCanvas);
-                }
+                interactCanvas.SetActive(isTargeted);
             }
 
-            // ★ 距離外に離れた場合は failedCanvas を非表示にする
-            if (!isCloseEnough && failedCanvas != null && failedCanvas.activeSelf)
+            if (!isTargeted && failedCanvas != null && failedCanvas.activeSelf)
             {
                 failedCanvas.SetActive(false);
             }
 
-            bool isInteractPressed = inputCommand != null
-                && inputCommand.Interact != null
-                && inputCommand.Interact.WasPressedThisFrame();
-
-            // 距離条件 + キー入力チェック
-            if (isCloseEnough && isInteractPressed)
+            // ★ 2. 「狙いを定めていて、かつボタンが押されたか」を1行で判定！
+            if (InteractDetector.Instance.WasInteracted(transform))
             {
-                // 必要アイテムの所持・使用チェック
-                if (canInteract)
+                if (CanInteract())
                 {
                     Interact();
                 }
@@ -124,14 +117,15 @@ public class EvidenceObject : MonoBehaviour
                 }
             }
 
-            if (failedCanvas != null && failedCanvas.activeSelf != isCloseEnough && hasFailed)
+            if (failedCanvas != null && failedCanvas.activeSelf != isTargeted && hasFailed)
             {
-                failedCanvas.SetActive(isCloseEnough);
+                failedCanvas.SetActive(isTargeted);
             }
         }
         else
         {
-            // --- インタラクト済みの時 ---
+            bool isCloseEnough = InteractDetector.Instance.IsCloseEnough(transform);
+
             if (resultCanvas != null && resultCanvas.activeSelf != isCloseEnough)
             {
                 resultCanvas.SetActive(isCloseEnough);
@@ -154,17 +148,6 @@ public class EvidenceObject : MonoBehaviour
         }
 
         resultCanvas.SetActive(true);
-
-        // NyonUI アニメーション再生
-        if (resultCanvas.TryGetComponent<NyonUI>(out var nyonUI))
-        {
-            nyonUI.Show();
-        }
-        else
-        {
-            nyonUI = resultCanvas.GetComponentInChildren<NyonUI>();
-            if (nyonUI != null) nyonUI.Show();
-        }
     }
 
     /// <summary>

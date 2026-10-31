@@ -119,6 +119,55 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &11379045
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 11379046}
+  - component: {fileID: 11379047}
+  m_Layer: 0
+  m_Name: InteractDetector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &11379046
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 11379045}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 187.40048, y: -1.16028, z: 205.64168}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1261766553}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &11379047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 11379045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 538d830e48ab6ef44bcdedfc54e61ea2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractDetector
+  playerCamera: {fileID: 65596512}
+  interactDistance: 1.5
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &17553405
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,12 +208,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 17553405}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.98158, y: 0.14761, z: 0.92371}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1.7931998, y: -1.01267, z: 2.52322}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &23169724
 GameObject:
@@ -1457,12 +1506,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 139132442}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.51188, y: 0.18545, z: -2.30123}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.6765, y: -0.97483, z: -0.70172}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &158769505
 GameObject:
@@ -1518,7 +1567,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 0}
   resultCanvas: {fileID: 864166765}
   targetParticle: {fileID: 0}
-  inputCommand: {fileID: 1653556350}
   isCombineResult: 0
   combineIngredient: {fileID: 0}
   combineResult: {fileID: 0}
@@ -1868,6 +1916,7 @@ GameObject:
   - component: {fileID: 259656194}
   - component: {fileID: 259656193}
   - component: {fileID: 259656192}
+  - component: {fileID: 259656196}
   m_Layer: 0
   m_Name: "\u6771\u6BCD"
   m_TagString: Untagged
@@ -1906,7 +1955,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TalkChar
   playerCamera: {fileID: 0}
-  inputCommand: {fileID: 1653556350}
   talkStartCanvas: {fileID: 1386183354}
   choiceCanvas: {fileID: 805570062}
   choiceButtonContainer: {fileID: 1902667507}
@@ -1930,8 +1978,8 @@ MonoBehaviour:
     requiredEvidences: []
     resultCanvasForThisChoice: {fileID: 411151421}
     dummyText: "\uFF1F\uFF1F\uFF1F\uFF1F"
-  interactDistance: 3
   rotateSpeed: 5
+  talkSE: {fileID: 8300000, guid: 021e7ea61f761ea4f9feb55ff9cb44f0, type: 3}
 --- !u!136 &259656193
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2012,6 +2060,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 259656190}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &259656196
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 259656190}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.8283541, y: 1.9999998, z: 1.9517126}
+  m_Center: {x: -0.029828353, y: 0, z: 0.115824915}
 --- !u!1 &261819877
 GameObject:
   m_ObjectHideFlags: 0
@@ -2624,7 +2693,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 1506400566}
   resultCanvas: {fileID: 813083753}
   targetParticle: {fileID: 370598355}
-  inputCommand: {fileID: 0}
   isCombineResult: 0
   combineIngredient: {fileID: 0}
   combineResult: {fileID: 0}
@@ -8155,12 +8223,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 474000463}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.48583, y: 0.87, z: -2.41856}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -3.2974498, y: -0.29027998, z: -0.8190501}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &488943300
 GameObject:
@@ -9067,7 +9135,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 0}
   resultCanvas: {fileID: 688189184}
   targetParticle: {fileID: 0}
-  inputCommand: {fileID: 1653556350}
   isCombineResult: 1
   combineIngredient: {fileID: 0}
   combineResult: {fileID: 0}
@@ -9142,12 +9209,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 545250168}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 60.4487, y: -0, z: -12.60532}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 63.63708, y: -1.16028, z: -11.00581}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &579271126
 GameObject:
@@ -9159,6 +9226,7 @@ GameObject:
   m_Component:
   - component: {fileID: 579271127}
   - component: {fileID: 579271128}
+  - component: {fileID: 579271129}
   m_Layer: 0
   m_Name: "\u4F9D\u983C\u66F8"
   m_TagString: Untagged
@@ -9205,12 +9273,32 @@ MonoBehaviour:
   interactCanvas: {fileID: 458155493}
   resultCanvas: {fileID: 1273252916}
   targetParticle: {fileID: 2035153132}
-  inputCommand: {fileID: 0}
   isCombineResult: 0
   combineIngredient: {fileID: 0}
   combineResult: {fileID: 0}
   requiredEvidences: []
   interactDistance: 1
+--- !u!65 &579271129
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579271126}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &580426854
 GameObject:
   m_ObjectHideFlags: 0
@@ -9523,12 +9611,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 619161023}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.38115, y: 0.61837, z: 1.36362}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1.1927698, y: -0.54191, z: 2.96313}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &628225603
 GameObject:
@@ -10741,7 +10829,6 @@ MonoBehaviour:
   openCanvasSE: {fileID: 0}
   playerCamera: {fileID: 0}
   distanceFromCamera: 1.5
-  inputCommand: {fileID: 0}
 --- !u!1 &799136416
 GameObject:
   m_ObjectHideFlags: 0
@@ -10842,7 +10929,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 0}
   resultCanvas: {fileID: 1965371748}
   targetParticle: {fileID: 0}
-  inputCommand: {fileID: 1653556350}
   isCombineResult: 0
   combineIngredient: {fileID: 0}
   combineResult: {fileID: 0}
@@ -11951,13 +12037,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 946337306}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.95521, y: 0.45496, z: -3.20325}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.76682997, y: -0.70532, z: -1.60374}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1977324695}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &946337308
 MonoBehaviour:
@@ -11975,7 +12061,6 @@ MonoBehaviour:
   openCanvasSE: {fileID: 8300000, guid: 50c6f5839c4029d48ba98b316255c45f, type: 3}
   playerCamera: {fileID: 0}
   distanceFromCamera: 1.5
-  inputCommand: {fileID: 1653556350}
 --- !u!1 &958647492
 GameObject:
   m_ObjectHideFlags: 0
@@ -12447,7 +12532,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 117657688}
   resultCanvas: {fileID: 1729130826}
   targetParticle: {fileID: 1597469285}
-  inputCommand: {fileID: 0}
   isCombineResult: 0
   combineIngredient: {fileID: 1783691553}
   combineResult: {fileID: 543001745}
@@ -13281,10 +13365,8 @@ MonoBehaviour:
   defaultBgColor: {r: 1, g: 1, b: 1, a: 1}
   detailModalPrefab: {fileID: 8328202597415196759, guid: d03b8095df3a8604e867f73df79b3f05, type: 3}
   detailModalParent: {fileID: 0}
-  notoSansFont: {fileID: 0}
   playerCamera: {fileID: 65596512}
   distanceFromCamera: 1
-  inputCommand: {fileID: 1653556350}
   wallOffset: 0.1
   obstacleLayer:
     serializedVersion: 2
@@ -13297,13 +13379,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1156572157}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.61972, y: 0.1518, z: -3.20325}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1.43134, y: -1.00848, z: -1.60374}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1014111200}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1163575484
 GameObject:
@@ -13363,7 +13445,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 0}
   resultCanvas: {fileID: 1920240394}
   targetParticle: {fileID: 0}
-  inputCommand: {fileID: 1653556350}
   isCombineResult: 0
   combineIngredient: {fileID: 0}
   combineResult: {fileID: 0}
@@ -13384,12 +13465,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 2.548674, y: 2.0475926, z: 2.615759}
+  m_Center: {x: -0.0758754, y: 0.5237963, z: -0.807879}
 --- !u!23 &1163575488
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -13397,7 +13478,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1163575484}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -13969,6 +14050,48 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1261431647}
   m_CullTransparentMesh: 1
+--- !u!1 &1261766552
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1261766553}
+  m_Layer: 0
+  m_Name: Script
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1261766553
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1261766552}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.18838, y: 1.16028, z: -1.59951}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 474000465}
+  - {fileID: 545250170}
+  - {fileID: 1325165371}
+  - {fileID: 17553407}
+  - {fileID: 1893528253}
+  - {fileID: 619161025}
+  - {fileID: 1156572159}
+  - {fileID: 1653556351}
+  - {fileID: 946337307}
+  - {fileID: 139132444}
+  - {fileID: 11379046}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1261939718
 GameObject:
   m_ObjectHideFlags: 0
@@ -14451,12 +14574,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1325165369}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.06176, y: 0.20282, z: -3.20325}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.87337995, y: -0.95746, z: -1.60374}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1358879389
 GameObject:
@@ -16120,6 +16243,7 @@ GameObject:
   - component: {fileID: 1521676090}
   - component: {fileID: 1521676089}
   - component: {fileID: 1521676088}
+  - component: {fileID: 1521676095}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Untagged
@@ -16277,6 +16401,22 @@ Transform:
   - {fileID: 438902942}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1521676095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1521676087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d090325859d6e549a57802b680affe8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFootstep
+  footstepLoopSound: {fileID: 8300000, guid: 8cba98ecaefb49740aa199ce8edc7fc1, type: 3}
+  moveThreshold: 0.1
+  characterController: {fileID: 0}
+  audioSource: {fileID: 0}
 --- !u!1 &1527034826
 GameObject:
   m_ObjectHideFlags: 0
@@ -19220,7 +19360,7 @@ GameObject:
   - component: {fileID: 1653556351}
   - component: {fileID: 1653556350}
   m_Layer: 0
-  m_Name: InputCommands
+  m_Name: InputCommandManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19308,6 +19448,32 @@ MonoBehaviour:
       m_Flags: 0
     m_Flags: 0
     m_Priority: 0
+  talkBuddy:
+    m_Name: Talk Buddy
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 3f0beda9-409c-41d8-95da-8afd920ed2a0
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: a3c7246f-8433-4755-bb69-0d7de0eebdb9
+      m_Path: <Keyboard>/v
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Talk Buddy
+      m_Flags: 0
+    - m_Name: 
+      m_Id: b8c03295-ff66-4de1-b43a-ca5e6a41cfcd
+      m_Path: <XRController>{RightHand}/{GripButton}
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Talk Buddy
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
 --- !u!4 &1653556351
 Transform:
   m_ObjectHideFlags: 0
@@ -19316,12 +19482,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1653556349}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.42598, y: 0.73269, z: -1.10372}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.23760009, y: -0.42759, z: 0.49579}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1656480450
 GameObject:
@@ -20321,7 +20487,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 0}
   resultCanvas: {fileID: 978031056}
   targetParticle: {fileID: 0}
-  inputCommand: {fileID: 1653556350}
   isCombineResult: 0
   combineIngredient: {fileID: 0}
   combineResult: {fileID: 0}
@@ -20489,7 +20654,6 @@ MonoBehaviour:
   interactCanvas: {fileID: 1392736079}
   resultCanvas: {fileID: 1527034826}
   targetParticle: {fileID: 338989747}
-  inputCommand: {fileID: 0}
   isCombineResult: 0
   combineIngredient: {fileID: 994689777}
   combineResult: {fileID: 543001745}
@@ -21619,12 +21783,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1893528251}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.98158, y: 0.14761, z: 0.92371}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1.7931998, y: -1.01267, z: 2.52322}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261766553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1899731361
 GameObject:
@@ -26174,16 +26338,7 @@ SceneRoots:
   - {fileID: 288154897}
   - {fileID: 133237337}
   - {fileID: 1778880925}
-  - {fileID: 474000465}
-  - {fileID: 545250170}
   - {fileID: 2106230242}
-  - {fileID: 1325165371}
-  - {fileID: 17553407}
-  - {fileID: 1893528253}
-  - {fileID: 619161025}
-  - {fileID: 1156572159}
-  - {fileID: 1653556351}
-  - {fileID: 946337307}
   - {fileID: 1311612707}
-  - {fileID: 139132444}
   - {fileID: 580426855}
+  - {fileID: 1261766553}

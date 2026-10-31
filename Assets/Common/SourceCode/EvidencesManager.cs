@@ -31,15 +31,9 @@ public class EvidenceManager : MonoBehaviour
     [SerializeField] private GameObject detailModalPrefab;
     [SerializeField] private Transform detailModalParent;
 
-    [Header("フォント設定")]
-    [SerializeField] private TMP_FontAsset notoSansFont;
-
     [Header("カメラ設定")]
     [SerializeField] private Transform playerCamera;
     [SerializeField] private float distanceFromCamera = 1.5f;
-
-    [Header("入力コマンド参照")]
-    [SerializeField] private InputCommand inputCommand;
 
     [Header("壁回避設定")]
     [Tooltip("壁に埋まらないように手前に移動させるオフセット（離す距離）")]
@@ -65,17 +59,18 @@ public class EvidenceManager : MonoBehaviour
             evidenceListCanvas.SetActive(false);
         }
 
-        if (inputCommand != null && inputCommand.ToggleEvidenceList != null)
+        // シングルトンからイベント登録
+        if (InputCommandManager.Instance != null && InputCommandManager.Instance.ToggleEvidenceList != null)
         {
-            inputCommand.ToggleEvidenceList.performed += OnToggleEvidenceListPerformed;
+            InputCommandManager.Instance.ToggleEvidenceList.performed += OnToggleEvidenceListPerformed;
         }
     }
 
     private void OnDestroy()
     {
-        if (inputCommand != null && inputCommand.ToggleEvidenceList != null)
+        if (InputCommandManager.Instance != null && InputCommandManager.Instance.ToggleEvidenceList != null)
         {
-            inputCommand.ToggleEvidenceList.performed -= OnToggleEvidenceListPerformed;
+            InputCommandManager.Instance.ToggleEvidenceList.performed -= OnToggleEvidenceListPerformed;
         }
     }
 
@@ -120,11 +115,6 @@ public class EvidenceManager : MonoBehaviour
                 else
                 {
                     buttonText.text = evidence.name;
-                }
-
-                if (notoSansFont != null)
-                {
-                    buttonText.font = notoSansFont;
                 }
             }
 
@@ -238,14 +228,12 @@ public class EvidenceManager : MonoBehaviour
         if (titleText != null)
         {
             titleText.text = evidence.name;
-            if (notoSansFont != null) titleText.font = notoSansFont;
         }
 
         TMP_Text descriptionText = currentDetailModalInstance.transform.Find("DescriptionText")?.GetComponent<TMP_Text>();
         if (descriptionText != null)
         {
             descriptionText.text = evidence.UIDescription;
-            if (notoSansFont != null) descriptionText.font = notoSansFont;
         }
 
         Button closeButton = currentDetailModalInstance.transform.Find("CloseButton")?.GetComponent<Button>();

@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // ★ InputSystemを使うため追加
+using UnityEngine.InputSystem;
 
 public class OptionCanvasManager : MonoBehaviour
 {
@@ -7,13 +7,9 @@ public class OptionCanvasManager : MonoBehaviour
     [SerializeField] private GameObject optionCanvas;
     [SerializeField] private AudioClip openCanvasSE; // 効果音
 
-
     [Header("カメラ設定")]
     [SerializeField] private Transform playerCamera; // プレイヤーのカメラ（Main Camera / HMD）
     [SerializeField] private float distanceFromCamera = 1.5f; // カメラからキャンバスまでの距離（メートル）
-
-    [Header("入力コマンド参照")]
-    [SerializeField] private InputCommand inputCommand;
 
     private void Start()
     {
@@ -22,18 +18,19 @@ public class OptionCanvasManager : MonoBehaviour
             optionCanvas.SetActive(false);
         }
 
-        if (inputCommand != null && inputCommand.ToggleOptionCanvas != null)
+        // シングルトンインスタンスからイベントを登録
+        if (InputCommandManager.Instance != null && InputCommandManager.Instance.ToggleOptionCanvas != null)
         {
-            inputCommand.ToggleOptionCanvas.performed += OnTogglePerformed;
+            InputCommandManager.Instance.ToggleOptionCanvas.performed += OnTogglePerformed;
         }
     }
 
     private void OnDestroy()
     {
         // イベント解除（メモリリーク防止）
-        if (inputCommand != null && inputCommand.ToggleOptionCanvas != null)
+        if (InputCommandManager.Instance != null && InputCommandManager.Instance.ToggleOptionCanvas != null)
         {
-            inputCommand.ToggleOptionCanvas.performed -= OnTogglePerformed;
+            InputCommandManager.Instance.ToggleOptionCanvas.performed -= OnTogglePerformed;
         }
     }
 
@@ -50,7 +47,7 @@ public class OptionCanvasManager : MonoBehaviour
 
         if (isActive)
         {
-            // ★ 表示前にカメラの前に位置を合わせる関数を呼び出す
+            // 表示前にカメラの前に位置を合わせる関数を呼び出す
             PositionCanvasInFrontOfCamera();
 
             optionCanvas.SetActive(true);
